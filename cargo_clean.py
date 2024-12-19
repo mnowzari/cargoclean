@@ -5,10 +5,12 @@ build artifacts via 'cargo clean'
 @author mnowzari
 '''
 # pylint: disable=broad-except
+import click
 import glob
 import subprocess as subpop
 
-DIRECTORY_TO_SEARCH = "/home/mattnowzari/Documents/rust_projects"
+HEADER = "\n==| Rust Auto Clean |=="
+FOOTER = "\n--| Script Complete |--\n"
 
 def run(cmd: list) -> bool:
     '''
@@ -39,12 +41,12 @@ def cmd_cargo_clean(project_dir: str, options: list) -> bool:
         return False
 
 
-def glob_and_clean() -> bool:
+def glob_and_clean(target_dir) -> bool:
     '''
     Glob through my Rust projects directory and run 'cargo clean'
     in each directory
     '''
-    search_pattern = '/'.join([f"{DIRECTORY_TO_SEARCH}", "*", "Cargo.toml"])
+    search_pattern = '/'.join([f"{target_dir}", "*", "Cargo.toml"])
 
     print(f"\n:: Searching {search_pattern} ::")
 
@@ -54,10 +56,15 @@ def glob_and_clean() -> bool:
         cmd_cargo_clean(proj_dir, [])
     return True
 
-
-if __name__ == "__main__":
-    HEADER = "\n==| Rust Auto Clean |=="
-    FOOTER = "\n--| Script Complete |--\n"
+@click.command()
+@click.option('--target_dir',
+        type=click.Path(),
+        required=True,
+        help='The directory of Rust projects you want cleaned.')
+def main(target_dir):
     print(f"{HEADER}")
-    glob_and_clean()
+    glob_and_clean(target_dir)
     print(f"{FOOTER}")
+
+if __name__=='__main__':
+    main()

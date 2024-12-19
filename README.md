@@ -1,4 +1,4 @@
-# Cargo Auto-Clean
+# Cargo Clean
 ## Script to quickly clean up my Rust project build artifacts
 
 Script will run "cargo clean" on all projects under "/rust_projects"
