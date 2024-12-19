@@ -4,10 +4,11 @@ build artifacts via 'cargo clean'
 
 @author mnowzari
 '''
-# pylint: disable=broad-except
-import click
-import glob
+# pylint: disable=broad-except, no-value-for-parameter
+
 import subprocess as subpop
+import glob
+import click
 
 HEADER = "\n==| Rust Auto Clean |=="
 FOOTER = "\n--| Script Complete |--\n"
@@ -62,6 +63,9 @@ def glob_and_clean(target_dir) -> bool:
         required=True,
         help='The directory of Rust projects you want cleaned.')
 def main(target_dir):
+    '''
+    main
+    '''
     print(f"{HEADER}")
     glob_and_clean(target_dir)
     print(f"{FOOTER}")
