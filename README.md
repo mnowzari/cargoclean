@@ -1,5 +1,5 @@
 # Cargo Clean
-## Script to quickly clean up my Rust project build artifacts
+## Script to quickly clean up Rust project build artifacts
 
 Script will run "cargo clean" on all projects under a provided --target_dir 
 

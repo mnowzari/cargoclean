@@ -1,14 +1,13 @@
 '''
-Script to automatically clean up my Rust project
+Script to automatically clean up Rust project
 build artifacts via 'cargo clean'
-
-@author mnowzari
 '''
 # pylint: disable=broad-except, no-value-for-parameter
 
 import subprocess as subpop
 import glob
 import click
+import os
 
 HEADER = "\n==| Rust Auto Clean |=="
 FOOTER = "\n--| Script Complete |--\n"
@@ -18,8 +17,7 @@ def run(cmd: list) -> bool:
     Function to run a given command
     '''
     try:
-        # print(f"  Command {cmd}\n")
-        # shell=True is not great but wtv
+        print(f"  Command {cmd}\n")
         subpop.check_output(" ".join(cmd), shell=True)
         return True
     except Exception as e_msg:
@@ -29,45 +27,54 @@ def run(cmd: list) -> bool:
 
 def cmd_cargo_clean(project_dir: str, options: list) -> bool:
     '''
-    Function for forming and running the cargo clean command
+    Function for forming and running commands
     '''
     try:
         cmd = [f"cd {project_dir};", "cargo", "clean"]
         if options:
             cmd.extend(options)
-        run(cmd)
-        return True
+        return run(cmd)
     except Exception as e_msg:
         print(f"Exception {e_msg} occurred during func cmd_cargo_clean()")
         return False
 
 
-def glob_and_clean(target_dir) -> bool:
+def glob_and_clean(target_dir: str, release: bool) -> bool:
     '''
-    Glob through my Rust projects directory and run 'cargo clean'
+    Glob through given Rust projects directory and run 'cargo clean'
     in each directory
     '''
-    search_pattern = '/'.join([f"{target_dir}", "*", "Cargo.toml"])
+    search_pattern = os.path.join(target_dir, "*", "Cargo.toml")
 
     print(f"\n:: Searching {search_pattern} ::")
 
     for cargo_toml_dir in glob.glob(search_pattern):
-        proj_dir = "/".join(cargo_toml_dir.split("/")[:-1])
+        proj_dir = os.path.dirname(cargo_toml_dir)
         print(f"\n{proj_dir}")
-        cmd_cargo_clean(proj_dir, [])
-    return True
+        
+        options = []
+        if release:
+            options.append("--release")
+        
+        cmd_cargo_clean(proj_dir, options)
+    return True 
 
 @click.command()
 @click.option('--target_dir',
         type=click.Path(),
         required=True,
         help='The directory of Rust projects you want cleaned.')
-def main(target_dir):
-    '''
-    main
-    '''
+@click.option('--release', is_flag=True)
+def main(target_dir, release):
+    ''' main '''
     print(f"{HEADER}")
-    glob_and_clean(target_dir)
+    
+    if release:
+        print(f"\n--release is enabled! \
+                \nArtifacts under ../target/release/ will be untouched.")
+
+    glob_and_clean(target_dir, release)
+    
     print(f"{FOOTER}")
 
 if __name__=='__main__':
