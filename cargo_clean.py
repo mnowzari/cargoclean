@@ -15,10 +15,16 @@ FOOTER = "\n--| Script Complete |--\n"
 def exec_cmd(cmd: list) -> bool:
     '''
     Function to run a given command
+    The cmd list we receive maps as follows:
+    [0] -> the project directory we need to cd to
+    [1:] -> the "cargo clean" command and any passed flags
     '''
     try:
-        print(f"  Command {cmd}\n")
-        subpop.check_output(" ".join(cmd), shell=True)
+        print(f"Current directory: {cmd[0]}")
+        os.chdir(cmd[0])
+        clean_command = " ".join(cmd[1:])
+        print(f"     Command: {clean_command}")
+        subpop.check_output(clean_command, shell=True)
         return True
     except Exception as e_msg:
         print(f"Exception {e_msg} occurred during the runtime of cmd {cmd}")
@@ -30,7 +36,7 @@ def cmd_cargo_clean(project_dir: str, options: list) -> bool:
     Function for forming and running commands
     '''
     try:
-        cmd = [f"cd {project_dir};", "cargo", "clean"]
+        cmd = [project_dir, "cargo", "clean"]
         if options:
             cmd.extend(options)
         return exec_cmd(cmd)
@@ -46,7 +52,7 @@ def glob_and_clean(target_dir: str, release: bool) -> bool:
     '''
     search_pattern = os.path.join(target_dir, "*", "Cargo.toml")
 
-    print(f"\n:: Searching {search_pattern} ::")
+    print(f"\n:: Searching for {search_pattern} ::")
 
     for cargo_toml_dir in glob.glob(search_pattern):
         proj_dir = os.path.dirname(cargo_toml_dir)
@@ -58,7 +64,7 @@ def glob_and_clean(target_dir: str, release: bool) -> bool:
     return True
 
 @click.command()
-@click.option('--target_dir',
+@click.option('--target-dir',
         type=click.Path(),
         required=True,
         help='The directory of Rust projects you want cleaned.')
@@ -67,8 +73,8 @@ def main(target_dir, release):
     ''' main '''
     print(f"{HEADER}")
     if release:
-        print("\n--release is enabled! \
-                \nArtifacts under ../target/release/ will be untouched.")
+        print("\n--release was passed. \
+                \nArtifacts under ../target/release/ will be deleted!.")
 
     glob_and_clean(target_dir, release)
     print(f"{FOOTER}")
